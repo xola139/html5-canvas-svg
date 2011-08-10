@@ -14,6 +14,10 @@
 			ctx.fillRect( 10 , 10 , 300 , 300 );
 		ctx.closePath();
 		
+		ctx.fillText( "Sample Text" , 400 , 10 );
+		
+		document.getElementById('svg').innerHTML = ctx.toDataURL("image/svg+xml");
+		
 	};
 </script>
 
@@ -21,5 +25,6 @@
 
 <body>
 <canvas id="SVG" width="600" height="600" style="border: solid 1px #999999;">Your browser does not support canvas.</canvas>
+<div id="svg"></div>
 </body>
 </html>

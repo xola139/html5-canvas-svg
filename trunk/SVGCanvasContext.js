@@ -15,7 +15,6 @@
 	/* Canvas Settings */
 	this.canvas = document.getElementById( id );
 	this.ctx = this.canvas.getContext( "2d" );
-	this.xml = "<?xml version=\"1.0\" standalone=\"no\"?><!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"><svg width=\"100%\" height=\"100%\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">";
 	
 	/* Settings */
 	this.strokeStyle = "black";
@@ -62,7 +61,6 @@
 	}
 	
 	this.lineTo = function( x , y ) {
-		//console.log( this.path.points );
 		this.path.points.push( { "action" : "line" , "x" : x , "y" : y } );
 		this.ctx.lineTo( x , y );
 	}
@@ -102,7 +100,7 @@
 	}
 	
 	this.bezierCurveTo = function( cp1x, cp1y, cp2x, cp2y, x, y ) {
-		this.path.points.push( { "action" : "quadratic" , "x" : x , "y" : y , "x1" :  cp1x, "y1" : cp1y , "x2" : cp2x, "y2" : cp2y  } );
+		this.path.points.push( { "action" : "bezier" , "x" : x , "y" : y , "x1" :  cp1x, "y1" : cp1y , "x2" : cp2x, "y2" : cp2y  } );
 		this.ctx.bezierCurveTo( cp1x, cp1y, cp2x, cp2y, x, y ) ;
 	}
 	
@@ -156,7 +154,7 @@
 	
 	this.toDataURL = function( type , args ) {
 		if( type == "image/svg+xml" ) {
-			return this.generateSVG();
+			return generateSVG( this.elements );
 		} else {
 			return this.ctx.toDataURL( type , args );
 		}
@@ -177,6 +175,40 @@
 			this.elements.push( elem );
 			this.path.points = [];
 		}
+	}
+	
+	function generateSVG( elements ) {
+		
+		var xml = "<?xml version=\"1.0\" standalone=\"no\"?><!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"><svg width=\"100%\" height=\"100%\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">";
+		
+		for( var i=0; i<elements.length; i++ ) {
+			var elem = elements[i];
+			var style ="";
+			for( var attr in elem.style ) {
+				style += attr+":"+elem.style[attr]+"; ";
+			}
+			console.log( elem.type );
+			if(elem.type == "text") {
+				xml += '<text x="'+elem.x+'" y="'+elem.y+'" style="'+style+'" >'+ elem.text +'</text>';
+			} else if(elem.type == "path") {
+				var points = "";
+				for( var j=0; j<elem.points.length; j++ ) {
+					var point = elem.points[j];
+					if( point.action == "move" ) {
+						points += "M"+point.x+" "+point.y+" ";
+					} else if( point.action == "line" ) {
+						points += "L"+point.x+" "+point.y+" ";	
+					}
+				}
+				
+				xml += '<path d="'+points.trim()+'" style="'+style+'" />';
+			}
+		}
+		
+		xml += "</svg>"
+		
+		return xml;
+		
 	}
 	 
  }
