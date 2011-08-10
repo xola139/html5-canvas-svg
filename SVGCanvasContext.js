@@ -198,6 +198,10 @@
 						points += "M"+point.x+" "+point.y+" ";
 					} else if( point.action == "line" ) {
 						points += "L"+point.x+" "+point.y+" ";	
+					} else if( point.action == "quadratic" ) {
+						points += "Q"+point.x1+" "+point.y1+" "+point.x+" "+point.y+" ";	
+					} else if( point.action == "bezier" ) {
+						points += "C"+point.x2+" "+point.y2+" "+point.x1+" "+point.y1+" "+point.x+" "+point.y+" ";	
 					}
 				}
 				

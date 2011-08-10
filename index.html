@@ -16,6 +16,41 @@
 		
 		ctx.fillText( "Sample Text" , 400 , 10 );
 		
+		roundRect( ctx , 400 , 400, 25, 25, 3, true , false );
+		
+		var centerX = 288;
+		var centerY = 160;
+		var radius = 75;
+		var startingAngle = 1.1 * Math.PI;
+		var endingAngle = 1.9 * Math.PI;
+		var counterclockwise = false;
+		
+		function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+			if (typeof stroke == "undefined" ) {
+			  stroke = true;
+			}
+			if (typeof radius === "undefined") {
+			  radius = 5;
+			}
+			ctx.beginPath();
+			ctx.moveTo(x + radius, y);
+			ctx.lineTo(x + width - radius, y);
+			ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+			ctx.lineTo(x + width, y + height - radius);
+			ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+			ctx.lineTo(x + radius, y + height);
+			ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+			ctx.lineTo(x, y + radius);
+			ctx.quadraticCurveTo(x, y, x + radius, y);
+			ctx.closePath();
+			if (stroke) {
+			  ctx.stroke();
+			}
+			if (fill) {
+			  ctx.fill();
+			}        
+		}
+		
 		document.getElementById('svg').innerHTML = ctx.toDataURL("image/svg+xml");
 		
 	};
