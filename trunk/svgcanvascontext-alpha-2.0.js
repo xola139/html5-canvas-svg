@@ -1,5 +1,5 @@
 /*!
- * HTML5 Canvas SVG Alpha 1.0
+ * HTML5 Canvas SVG Alpha 2.0
  * http://specinnovations.com/
  *
  * Copyright 2011, SPEC Innovations
@@ -10,174 +10,225 @@
  * Date: Tue Aug 09 2011 -0400
  */
  
- function SVGCanvasContext( id ) {
-	 
-	/* Canvas Settings */
-	this.canvas = document.getElementById( id );
-	this.ctx = this.canvas.getContext( "2d" );
+var SVGCanvas = (function() {
 	
-	/* Settings */
-	this.strokeStyle = "black";
-	this.lineWidth = 1;
-	this.lineCap = "butt";
-	this.lineJoin = "miter";
-	this.miterLimit = 10;
-	this.fillStyle = "black";
-	this.shadowOffsetX = 0;
-	this.shadowOffsetY = 0;
-	this.shadowBlur = 0;
-	this.shadowColor = "transparent black";
-	this.font = "10px sans-serif";
-	this.textAlign = "start";
-	this.textBaseline = "alphabetic";
+	// default canvas settings
+	var settings = {
+		strokeStyle   : "black",
+		lineWidth     : 1,
+		lineCap       : "butt",
+		lineJoin      : "miter",
+		miterLimit    : 10,
+		fillStyle     : "black",
+		shadowOffsetX : 0,
+		shadowOffsetY : 0,
+		shadowBlur    : 0,
+		shadowColor   : "transparent black",
+		font          : "10px sans-serif",
+		textAlign     : "start",
+		textBaseline  : "alphabetic"
+	}
 	
-	/* SVG Storage */
-	this.elements = [];
-	this.path = {
+	// current path template
+	var currentPath = {
 		type : "path",
-		points : [],
-		style : {
-			"fill" : "",
-			"stroke" : "", 
-			"stroke-width" : 0,
-			"stroke-linecap" : "",
-			"stroke-miterlimit" : 0,
-			"stroke-linejoin" : ""
-		}
-	}
-	 
-	this.beginPath = function() {
-		this.push();
+		points : new Array(),
+		style : {}
 	}
 	
-	this.closePath = function() {
-		this.push();
-	}
+	// canvas DOM element
+	var canvas = null;
 	
-	this.moveTo = function( x , y ) {
-		this.push();
-		this.path.points.push( { "action" : "move" , "x" : x , "y" : y } );
-		this.ctx.moveTo( x , y );
-	}
+	// canvas context
+	var ctx = null;
 	
-	this.lineTo = function( x , y ) {
-		this.path.points.push( { "action" : "line" , "x" : x , "y" : y } );
-		this.ctx.lineTo( x , y );
-	}
+	// elements drawn to the canvas
+	var elements = [];
 	
-	this.stroke = function() {
-		this.path.style["stroke"] = this.ctx.strokeStyle = this.strokeStyle;
-		this.path.style["stroke-width"] = this.ctx.lineWidth = this.lineWidth;
-		this.path.style["stroke-linecap"] = this.ctx.lineCap = this.lineCap;
-		this.path.style["stroke-miterlimit"] = this.ctx.miterLimit = this.miterLimit;
-		this.path.style["stroke-linejoin"] = this.ctx.lineJoin = this.lineJoin;
-		this.ctx.stroke();
-	}
-	
-	this.fill = function() {
-		this.path.style["fill"] = this.ctx.fillStyle = this.fillStyle;
-		this.ctx.fill();
-	}
-	
-	this.strokeText = function( text , x , y ) {
-		this.elements.push( { "type" : "text" , "text" : text , "x" : x , "y" : y , style : { "font" : this.font , "text-align" : this.textAlign , "alignment-baseline" : this.textBaseline, "fill" : this.strokeStyle } } );
-		this.ctx.strokeText( text , x , y );
-	}
-	
-	this.fillText = function( text , x , y ) {
-		this.ctx.font = this.font;
-		this.elements.push( { "type" : "text" , "text" : text , "x" : x , "y" : y , style : { "font" : this.font , "text-align" : this.textAlign , "alignment-baseline" : this.textBaseline, "fill" : this.fillStyle } } );
-		this.ctx.fillText( text , x , y );
-	}
-	
-	this.measureText = function( text ) {
-		return this.ctx.measureText( text );	
-	}
-	
-	this.quadraticCurveTo = function( cpx, cpy, x, y ) {
-		this.path.points.push( { "action" : "quadratic" , "x" : x , "y" : y , "x1" :  cpx, "y1" : cpy } );
-		this.ctx.quadraticCurveTo( cpx, cpy, x, y );
-	}
-	
-	this.bezierCurveTo = function( cp1x, cp1y, cp2x, cp2y, x, y ) {
-		this.path.points.push( { "action" : "bezier" , "x" : x , "y" : y , "x1" :  cp1x, "y1" : cp1y , "x2" : cp2x, "y2" : cp2y  } );
-		this.ctx.bezierCurveTo( cp1x, cp1y, cp2x, cp2y, x, y ) ;
-	}
-	
-	this.arcTo = function( x1, y1, x2, y2, radius ) {
-		this.moveTo( x1 , y1 );
-		this.bezierCurveTo( x1 , (y1+radius) , x2 , (y2+radius) );
-		this.ctx.arcTo( x1, y1, x2, y2, radius );
-	}
-	
-	this.arc = function( x, y, radius, startAngle, endAngle, anticlockwise ) {
-		this.ctx.arc( x, y, radius, startAngle, endAngle, anticlockwise );
-	}
-	
-	this.rect = function( x , y , width , height ) {
-		this.moveTo( x , y );
-		this.lineTo( x+width , y );
-		this.lineTo( x+width , y+height );
-		this.lineTo( x ,  y+height );
-		this.lineTo( x , y );
-	}
-	
-	this.fillRect = function( x , y , width , height )  {
-		this.push();
-		this.moveTo( x , y );
-		this.lineTo( x+width , y );
-		this.lineTo( x+width , y+height );
-		this.lineTo( x ,  y+height );
-		this.lineTo( x , y );
-		this.fill();
-		this.push();
-	}
-	
-	this.strokeRect = function( x , y , width , height )  {
-		this.push();
-		this.moveTo( x , y );
-		this.lineTo( x+width , y );
-		this.lineTo( x+width , y+height );
-		this.lineTo( x ,  y+height );
-		this.lineTo( x , y );
-		this.stroke();
-		this.push();
-	}
-	
-	this.save = function() {
-		this.ctx.save();
-	}
-	
-	this.restore = function() {
-		this.ctx.restore();
-	}
-	
-	this.toDataURL = function( type , args ) {
-		if( type == "image/svg+xml" ) {
-			return generateSVG( this.elements );
-		} else {
-			return this.ctx.toDataURL( type , args );
-		}
+	var SVGCanvas = function( id ) {
+		canvas = document.getElementById( id );
+		ctx = canvas.getContext( "2d" );
+		
+		/* Settings */
+		this.strokeStyle = "black";
+		this.lineWidth = 1;
+		this.lineCap = "butt";
+		this.lineJoin = "miter";
+		this.miterLimit = 10;
+		this.fillStyle = "black";
+		this.shadowOffsetX = 0;
+		this.shadowOffsetY = 0;
+		this.shadowBlur = 0;
+		this.shadowColor = "transparent black";
+		this.font = "10px sans-serif";
+		this.textAlign = "start";
+		this.textBaseline = "alphabetic";
 		
 	}
 	
-	this.isPointInPath = function( x, y ) {
-		return this.ctx.isPointInPath( x , y );
-	}
+	SVGCanvas.prototype = {
+		constructor : SVGCanvas,
+		getCanvas : function() { return canvas; },
+		getContext : function() { return ctx; },
+		
+		beginPath : function() {
+			pushToStack();
+			ctx.beginPath();
+		},
+		
+		closePath : function() {
+			pushToStack();
+			ctx.closePath();
+		},
+		
+		moveTo : function( x , y ) {
+			currentPath.points.push({ "action" : "move" , "x" : x , "y" : y });
+			ctx.moveTo( x , y );
+		},
+		
+		lineTo : function( x , y ) {
+			currentPath.points.push({ "action" : "line" , "x" : x , "y" : y });
+			ctx.lineTo( x , y );
+		},
+		
+		quadraticCurveTo : function( cpx, cpy, x, y ) {
+			currentPath.points.push({ "action" : "quadratic" , "x" : x , "y" : y , "x1" :  cpx, "y1" : cpy });
+			ctx.quadraticCurveTo( cpx, cpy, x, y );
+		},
+		
+		bezierCurveTo : function( cp1x, cp1y, cp2x, cp2y, x, y ) {
+			currentPath.points.push({ "action" : "bezier" , "x" : x , "y" : y , "x1" :  cp1x, "y1" : cp1y , "x2" : cp2x, "y2" : cp2y  } );
+			ctx.bezierCurveTo( cp1x, cp1y, cp2x, cp2y, x, y ) ;
+		},
+		
+		arcTo : function( x1, y1, x2, y2, radius ) {
+			currentPath.points.push({ "action" : "move" , "x" : x1 , "y" : y1 });
+			this.bezierCurveTo( x1 , (y1+radius) , x2 , (y2+radius) );
+			ctx.arcTo( x1, y1, x2, y2, radius );
+		},
+		
+		arc : function( x, y, radius, startAngle, endAngle, anticlockwise ) {
+			ctx.arc( x, y, radius, startAngle, endAngle, anticlockwise );
+		},
+		
+		rect : function( x , y , width , height ) {
+			currentPath.points.push({ "action" : "move" , "x" : x , "y" : y });
+			currentPath.points.push({ "action" : "line" , "x" : x+width , "y" : y });
+			currentPath.points.push({ "action" : "line" , "x" : x+width , "y" : y+height });
+			currentPath.points.push({ "action" : "line" , "x" : x , "y" : y+height });
+			currentPath.points.push({ "action" : "line" , "x" : x , "y" : y });
+			ctx.rect( x , y , width , height );
+		},
 	
-	this.push = function() {
-		if( this.path.points.length > 0 ) {
-			var elem = {
-				style : this.path.style,
-				points : this.path.points,
-				type : this.path.type	
+		fillRect : function( x , y , width , height )  {
+			pushToStack();
+			var rect = { type : "path" , style : {} };
+			rect.points = new Array();
+			rect.points.push({ "action" : "move" , "x" : x , "y" : y });
+			rect.points.push({ "action" : "line" , "x" : x+width , "y" : y });
+			rect.points.push({ "action" : "line" , "x" : x+width , "y" : y+height });
+			rect.points.push({ "action" : "line" , "x" : x , "y" : y+height });
+			rect.points.push({ "action" : "line" , "x" : x , "y" : y });
+			rect.style["fill"] = ctx.fillStyle = this.fillStyle;
+			elements.push( rect );
+			ctx.fillRect( x , y , width , height );
+		},
+	
+		strokeRect : function( x , y , width , height )  {
+			pushToStack();
+			var rect = { type : "path" , style : {} };
+			rect.points = new Array();
+			rect.points.push({ "action" : "move" , "x" : x , "y" : y });
+			rect.points.push({ "action" : "line" , "x" : x+width , "y" : y });
+			rect.points.push({ "action" : "line" , "x" : x+width , "y" : y+height });
+			rect.points.push({ "action" : "line" , "x" : x , "y" : y+height });
+			rect.points.push({ "action" : "line" , "x" : x , "y" : y });
+			rect.style["stroke"] = ctx.strokeStyle = this.strokeStyle;
+			rect.style["stroke-width"] = ctx.lineWidth = this.lineWidth;
+			rect.style["stroke-linecap"] = ctx.lineCap = this.lineCap;
+			rect.style["stroke-miterlimit"] = ctx.miterLimit = this.miterLimit;
+			rect.style["stroke-linejoin"] = ctx.lineJoin = this.lineJoin;
+			elements.push( rect );
+			ctx.strokeRect( x , y , width , height );
+		},
+	
+		isPointInPath : function( x, y ) {
+			return ctx.isPointInPath( x , y );
+		},
+		
+		stroke : function() {
+			var path;
+			if( currentPath.points.length > 0 ) {
+				path = currentPath;
+			} else {
+				path = elements[elements.length-1];
 			}
-			this.elements.push( elem );
-			this.path.points = [];
+			path.style["stroke"] = ctx.strokeStyle = this.strokeStyle;
+			path.style["stroke-width"] = ctx.lineWidth = this.lineWidth;
+			path.style["stroke-linecap"] = ctx.lineCap = this.lineCap;
+			path.style["stroke-miterlimit"] = ctx.miterLimit = this.miterLimit;
+			path.style["stroke-linejoin"] = ctx.lineJoin = this.lineJoin;
+			ctx.stroke();
+		},
+		
+		fill : function() {
+			var path;
+			if( currentPath.points.length > 0 ) {
+				path = currentPath;
+			} else {
+				path = elements[elements.length-1];
+			}
+			path.style["fill"] = ctx.fillStyle = this.fillStyle;
+			ctx.fill();
+		},
+		
+		strokeText : function( text , x , y ) {
+			ctx.font = this.font;
+			elements.push( { "type" : "text" , "text" : text , "x" : x , "y" : y , style : { "font" : this.font , "text-align" : this.textAlign , "alignment-baseline" : this.textBaseline, "fill" : this.strokeStyle } } );
+			ctx.strokeText( text , x , y );
+		},
+		
+		fillText : function( text , x , y ) {
+			ctx.font = this.font;
+			elements.push( { "type" : "text" , "text" : text , "x" : x , "y" : y , style : { "font" : this.font , "text-align" : this.textAlign , "alignment-baseline" : this.textBaseline, "fill" : this.fillStyle } } );
+			ctx.fillText( text , x , y );
+		},
+		
+		measureText : function( text ) {
+			return ctx.measureText( text );
+		},
+		
+		save : function() {
+			ctx.save();
+		},
+	
+		restore : function() {
+			ctx.restore();
+		},
+	
+		toDataURL : function( type , args ) {
+			if( type == "image/svg+xml" ) {
+				return generateSVG();
+			} else {
+				return ctx.toDataURL( type , args );
+			}
+			
 		}
 	}
 	
-	function generateSVG( elements ) {
+	function pushToStack() {
+		if( currentPath.points.length > 0 ) {
+			console.log( currentPath );
+			elements.push( currentPath );
+			currentPath = {
+				type : "path",
+				points : new Array(),
+				style : {}
+			}
+		}
+	}
+	
+	function generateSVG() {
 		
 		var xml = "<?xml version=\"1.0\" standalone=\"no\"?><!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\"><svg width=\"100%\" height=\"100%\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">";
 		
@@ -187,7 +238,6 @@
 			for( var attr in elem.style ) {
 				style += attr+":"+elem.style[attr]+"; ";
 			}
-			console.log( elem.type );
 			if(elem.type == "text") {
 				xml += '<text x="'+elem.x+'" y="'+elem.y+'" style="'+style+'" >'+ elem.text +'</text>';
 			} else if(elem.type == "path") {
@@ -205,7 +255,7 @@
 					}
 				}
 				
-				xml += '<path d="'+points.trim()+'" style="'+style+'" />';
+				xml += '<path d="'+points+'" style="'+style+'" />';
 			}
 		}
 		
@@ -214,5 +264,7 @@
 		return xml;
 		
 	}
-	 
- }
+	
+	return SVGCanvas;
+	
+})();
