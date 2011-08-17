@@ -9,8 +9,8 @@
  *
  * Date: Tue Aug 09 2011 -0400
  */
- 
-var SVGCanvas = (function() {
+
+var SVGCanvas = (function( window , document , undefined ) { 
 	
 	// default canvas settings
 	var settings = {
@@ -267,4 +267,4 @@ var SVGCanvas = (function() {
 	
 	return SVGCanvas;
 	
-})();
+})( window , document );
